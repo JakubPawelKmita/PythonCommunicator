@@ -33,6 +33,11 @@ class Request:
             "password": password  # string
         }
 
+    def logout(self):
+        self.dict = {
+            "action": "logout"
+        }	
+
     def get_chats(self):
         self.dict = {
             "action": "get_chats"
@@ -131,6 +136,10 @@ def main():
             request.login(input("  login: "), input("  password: "))
             client.send_message(request.get_prepared_request())
 
+        elif command == "logout":
+            request.logout()
+            client.send_message(request.get_prepared_request())
+
         elif command == "get_chats":
             request.get_chats()
             client.send_message(request.get_prepared_request())
@@ -159,6 +168,7 @@ def main():
             print("  List of commands:")
             print("    register       ")
             print("    login          ")
+            print("    logout         ")
             print("    get_chats      ")
             print("    create_chat    ")
             print("    add_to_chat    ")
