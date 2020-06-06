@@ -59,8 +59,28 @@ class WelcomePage(tk.Frame):
         register_button.pack(pady=10, padx=10)
 
     def login(self):
-        self.request.login(self.username_verify.get(), self.password_verify.get())
-        self.client_socket.send_message(self.request.get_prepared_request())
+        validation_result = self.login_validation()
+        result = list(filter(lambda x: x is True, validation_result))
+        if len(result) == len(validation_result):
+            self.request.login(self.username_verify.get(), self.password_verify.get())
+            self.client_socket.send_message(self.request.get_prepared_request())
+
+    def login_validation(self):
+        positive_validation = [True, True]
+        if len(self.username_verify.get()) == 0:
+            self.error_username_verify.set("Username cannot be empty")
+            positive_validation[0] = False
+        else:
+            self.error_username_verify.set("")
+            positive_validation[0] = True
+        if len(self.password_verify.get()) == 0:
+            self.error_password_verify.set("Password cannot be empty")
+            positive_validation[1] = False
+        else:
+            self.error_password_verify.set("")
+            positive_validation[1] = True
+        return positive_validation
+
 
     def register(self):
         self.clean_everything()
