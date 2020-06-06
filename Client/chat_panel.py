@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox as mb
 
-LARGE_FONT= ("Verdana", 12)
+LARGE_FONT = ("Verdana", 12)
+
 
 class ChatPanel(tk.Frame):
 
@@ -41,8 +43,11 @@ class ChatPanel(tk.Frame):
         create_button = tk.Button(self, text="Create Chat", width=20, height=1, command = self.create_chat)
         create_button.pack(pady=10, padx=10)
 
-        back_button = tk.Button(self, text="Log out", width=20, height=1, command = self.back_to_startpage)
+        back_button = tk.Button(self, text="Log out", width=20, height=1, command=self.logout)
         back_button.pack(pady=10, padx=10)
+
+        refresh_button = tk.Button(self, text="Refresh chats", width=20, height=1, command=self.get_chats)
+        refresh_button.pack(pady=10, padx=10)
 
     def get_chats(self):
         self.request.get_chats()
@@ -63,7 +68,18 @@ class ChatPanel(tk.Frame):
         self.clean_everything()
         self.controller.show_frame("CreateChatPanel")
 
+    def logout(self):
+        self.request.logout()
+        self.client_socket.send_message(self.request.get_prepared_request())
+        self.back_to_startpage()
+
+    def show_timeout_message(self):
+        mb.showerror("Logout", "Logout completed - timeout is reached")
+
     def message_arrived(self, message):
+        if message["action"] == "logout" and message["msg"] == "Logout completed - timeout is reached":
+            self.show_timeout_message()
+            self.back_to_startpage()
         if message["action"] == "get_chats":
             msg = message["msg"]
             if message["succeed"] == True and message["chats"] is None:

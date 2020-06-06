@@ -24,6 +24,11 @@ class Request:
             "password": password  # string
         }
 
+    def logout(self):
+        self.dict = {
+            "action": "logout"
+        }
+
     def get_chats(self):
         self.dict = {
             "action": "get_chats"

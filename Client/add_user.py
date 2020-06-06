@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox as mb
 
 LARGE_FONT= ("Verdana", 12)
 
@@ -53,7 +54,7 @@ class AddUserToChat(tk.Frame):
         back_chat_panel_button = tk.Button(self, text="Back to Chat", width=20, height=1, command = self.back_to_chat)
         back_chat_panel_button.grid(row=6, column=0, sticky="nsew", padx=2, pady=2)
 
-        back_button = tk.Button(self, text="Log out", width=20, height=1, command = self.back_to_startpage)
+        back_button = tk.Button(self, text="Log out", width=20, height=1, command=self.logout)
         back_button.grid(row=7, column=0, sticky="nsew", padx=2, pady=2)
 
     def get_users(self):
@@ -91,6 +92,11 @@ class AddUserToChat(tk.Frame):
         self.controller.show_frame("WelcomePage")
         self.clean_everything()
 
+    def logout(self):
+        self.request.logout()
+        self.client_socket.send_message(self.request.get_prepared_request())
+        self.back_to_startpage()
+
     def add_to_chat(self):
         checks = [ i.get() for i in self.checkboxes.values()]
         if 1 in checks:
@@ -102,8 +108,14 @@ class AddUserToChat(tk.Frame):
         else:
             self.error_user_add.set("You have to choose at least one member!")
 
+    def show_timeout_message(self):
+        mb.showerror("Logout", "Logout completed - timeout is reached")
+
     def message_arrived(self, message):
         msg = message["msg"]
+        if message["action"] == "logout" and message["msg"] == "Logout completed - timeout is reached":
+            self.show_timeout_message()
+            self.back_to_startpage()
         if message["action"] == "get_users":
             if message["succeed"] == True and message['user_list'] is None:
                 self.users = []

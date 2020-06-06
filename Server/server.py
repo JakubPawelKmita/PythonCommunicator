@@ -3,6 +3,7 @@ import socket
 import select
 import json
 import hashlib
+from datetime import datetime
 
 HEADER_LENGTH = 10
 IP = "127.0.0.1"
@@ -106,7 +107,7 @@ class Response:
         self.dict = {
             "action": "failed action",
             "succeed": False,
-            "msg" : msg
+            "msg": msg
         }
 
     def get_prepared_response(self):
@@ -127,11 +128,57 @@ def receive_message(client_socket):
         return False
 
 
+def update_lastaction_time(user_id):
+    lastactionsql = f"UPDATE users set lastaction = %s where id = %s"
+    cur.execute(lastactionsql, (datetime.now(), user_id))
+    mydb.commit()
+
+
+def logout_acion(msg):
+    try:
+        cur.execute(f"SELECT login FROM users WHERE id = {user_id[notified_socket]}")
+        result = cur.fetchall()
+        if len(result) == 1:
+            cur.execute(f"UPDATE users SET islogged = 0 WHERE id = {user_id[notified_socket]}")
+            mydb.commit()
+            user_id[notified_socket] = None
+            response.logout(True, msg)
+            notified_socket.send(response.get_prepared_response())
+
+    except KeyError:
+        print("Client is not logged")
+        response.get_chats(False, "You are not logged", None)
+        notified_socket.send(response.get_prepared_response())
+
+
+def get_lastaction_difference(user_id):
+    cur.execute(f'SELECT lastaction FROM users WHERE id = "{user_id}"')
+    result = cur.fetchall()
+    minute_diff = (datetime.now() - result[0][0]).seconds / 60
+    print(minute_diff)
+    if minute_diff > float(datetime.now().replace(hour=0, minute=1, second=0, microsecond=0).minute):
+        return True
+    return False
+
+
+def logout_client_after_close(user_to_logout_id):
+    try:
+        cur.execute(f"SELECT login FROM users WHERE id = {user_to_logout_id}")
+        result = cur.fetchall()
+        if len(result) == 1:
+            cur.execute(f"UPDATE users SET islogged = 0 WHERE id = {user_to_logout_id}")
+            mydb.commit()
+
+    except KeyError:
+        print("Client is not logged22222")
+
+
 mydb = mysql.connector.connect(
-    host="localhost",
+    host="127.0.0.1",
     user="root",
-    passwd="",
-    db="pychatdb"
+    passwd="root",
+    db="pychatdb",
+    port=3307
 )
 
 response = Response()
@@ -164,6 +211,7 @@ while True:
                 sockets_list.remove(notified_socket)
                 del clients[notified_socket]
                 try:
+                    logout_client_after_close(user_id[notified_socket])
                     del id_user[user_id[notified_socket]]
                     del user_id[notified_socket]
                 except KeyError:
@@ -173,9 +221,10 @@ while True:
             # request processing
             print('New request from {}:{} > {}'.format(*clients[notified_socket], message))
             req = json.loads(message)
-            if not user_id or notified_socket not in user_id.keys() or user_id[notified_socket] is None: #User not logged
+            if not user_id or notified_socket not in user_id.keys() or user_id[
+                notified_socket] is None:  # User not logged
                 print("User not logged")
-                #Operacje dostepne dla niezalogowanego usera: login, register
+                # Operacje dostepne dla niezalogowanego usera: login, register
                 if req["action"] == "register":
                     cur.execute(f'SELECT login FROM users WHERE login = "{req["login"]}"')
                     if len(cur.fetchall()) == 0:
@@ -239,6 +288,8 @@ while True:
                             user_id[notified_socket] = result[0][0]
                             id_user[result[0][0]] = notified_socket
 
+                            update_lastaction_time(result[0][0])
+
                             response.login(True, None)
                             notified_socket.send(response.get_prepared_response())
                 else:
@@ -246,21 +297,16 @@ while True:
                     notified_socket.send(response.get_prepared_response())
             else:
                 print("User ", user_id[notified_socket], " logged")
+                last_action_time = get_lastaction_difference(user_id[notified_socket])
+                if last_action_time:
+                    update_lastaction_time(user_id[notified_socket])
+                    logout_msg = "Logout completed - timeout is reached"
+                    logout_acion(logout_msg)
+                    continue
+                update_lastaction_time(user_id[notified_socket])
                 if req["action"] == "logout":
-                    try:
-                        cur.execute(f"SELECT login FROM users WHERE id = {user_id[notified_socket]}")
-                        result = cur.fetchall()
-                        if len(result) == 1:
-                            cur.execute(f"UPDATE users SET islogged = 0 WHERE id = {user_id[notified_socket]}")
-                            mydb.commit()
-                            user_id[notified_socket] = None
-                            response.login(True, "Logout completed - current user is None")
-                            notified_socket.send(response.get_prepared_response())
-
-                    except KeyError:
-                        print("Client is not logged")
-                        response.get_chats(False, "You are not logged", None)
-                        notified_socket.send(response.get_prepared_response())
+                    logout_msg = "Logout completed - current user is None"
+                    logout_acion(logout_msg)
 
                 elif req["action"] == "get_chats":
                     try:
@@ -305,7 +351,8 @@ while True:
 
                         cur.execute(
                             f'SELECT * FROM chats WHERE creator = {user_id[notified_socket]} AND id = {chat}')
-                        if len(cur.fetchall()) == 0:
+                        res = cur.fetchall()
+                        if len(res) == 0:
                             response.add_to_chat(False, "You are not a creator of this chat")
                             raise Exception("Not a creator")
 

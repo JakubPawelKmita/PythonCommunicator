@@ -76,11 +76,39 @@ class RegisterPage(tk.Frame):
         back_button.pack(pady=10, padx=10)
 
     def register(self):
-        if self.check_variable.get() == 1:
+        validation_result = self.register_validation()
+        result = list(filter(lambda x: x is True, validation_result))
+        if len(result) == len(validation_result):
             self.request.register(self.username_verify.get(), self.password_verify.get(), self.email_verify.get())
             self.client_socket.send_message(self.request.get_prepared_request())
+
+    def register_validation(self):
+        positive_validation = [True, True, True, True]
+        if len(self.username_verify.get()) == 0:
+            self.error_username_verify.set("Username cannot be empty")
+            positive_validation[0] = False
         else:
+            self.error_username_verify.set("")
+            positive_validation[0] = True
+        if len(self.password_verify.get()) == 0:
+            self.error_password_verify.set("Password cannot be empty")
+            positive_validation[1] = False
+        else:
+            self.error_password_verify.set("")
+            positive_validation[1] = True
+        if len(self.email_verify.get()) == 0:
+            self.error_email_verify.set("Email cannot be empty")
+            positive_validation[2] = False
+        else:
+            self.error_email_verify.set("")
+            positive_validation[2] = True
+        if self.check_variable.get() == 0:
             self.error_regulations.set("You have to agree with the rules")
+            positive_validation[3] = False
+        else:
+            self.error_regulations.set("")
+            positive_validation[3] = True
+        return positive_validation
         
     def back_to_startpage(self):
         self.clean_everything()
@@ -88,15 +116,24 @@ class RegisterPage(tk.Frame):
 
     def message_arrived(self, message):
         if message["succeed"] == True:
-            self.set_error_labels("","","","","Congratulations. Now you can login, come back to Login Page")
-        else: 
+            self.error_registration.set("Congratulations. Now you can login, come back to Login Page")
+            self.error_username_verify.set("")
+            self.error_password_verify.set("")
+            self.error_email_verify.set("")
+        else:
             msg = message["msg"]
             if "user" in msg:
-                self.set_error_labels(msg, "", "")
+                self.error_username_verify.set(msg)
+                self.error_password_verify.set("")
+                self.error_email_verify.set("")
             elif "password" in msg:
-                self.set_error_labels("", msg, "")
+                self.error_password_verify.set(msg)
+                self.error_username_verify.set("")
+                self.error_email_verify.set("")
             elif "email" in msg:
-                self.set_error_labels("", "", msg)
+                self.error_email_verify.set(msg)
+                self.error_password_verify.set("")
+                self.error_username_verify.set("")
         
     def clean_everything(self):
         self.username_verify.set("")
