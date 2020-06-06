@@ -55,9 +55,9 @@ class WelcomePage(tk.Frame):
         label_do_not_have_an_account = tk.Label(self, text="You don't have an account? Register here!")
         label_do_not_have_an_account.pack(pady=10, padx=10)
 
-        register_button = tk.Button(self, text="Register", width=10, height=1, command = self.register)
+        register_button = tk.Button(self, text="Register", width=10, height=1, command=self.register)
         register_button.pack(pady=10, padx=10)
-        
+
     def login(self):
         self.request.login(self.username_verify.get(), self.password_verify.get())
         self.client_socket.send_message(self.request.get_prepared_request())
@@ -67,16 +67,30 @@ class WelcomePage(tk.Frame):
         self.controller.show_frame("RegisterPage")
 
     def message_arrived(self, message):
+        if message["action"] == "logout" and message["msg"] == "Logout completed - timeout is reached":
+            self.back_to_startpage()
         if message["succeed"] == True:
             self.controller.client_socket.set_client_name(self.username_verify.get())
-            self.clean_everything()
-            self.controller.show_frame("ChatPanel")
-        else: 
+            self.username_verify.set("")
+            self.password_verify.set("")
+            self.error_username_verify.set("")
+            self.error_password_verify.set("")
+            if message["action"] != "logout":
+                self.controller.show_frame("ChatPanel")
+            else:
+                self.controller.show_frame("WelcomePage")
+
+        else:
             msg = message["msg"]
             if "user" in msg:
-                self.set_error_labels(msg, "")
+                self.error_username_verify.set(msg)
+                self.error_password_verify.set("")
+            elif "password" in msg:
+                self.error_password_verify.set(msg)
+                self.error_username_verify.set("")
             else:
-                self.set_error_labels("", msg)
+                self.error_password_verify.set(msg)
+                self.error_username_verify.set("")
 
     def clean_everything(self):
         self.username_verify.set("")

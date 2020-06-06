@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk 
+from tkinter import messagebox as mb
 
 LARGE_FONT= ("Verdana", 12)
 
@@ -48,10 +48,11 @@ class ChatPage(tk.Frame):
         self.buttonAddUser.grid(column=0, row=3, sticky="nsew")
         self.buttonAddUser.bind("<Button-1>", lambda event: self.add_member())
 
-        back_chat_panel_button = tk.Button(self, text="Back to Chat Panel", width=20, height=1, command = self.back_to_chatpanel)
+        back_chat_panel_button = tk.Button(self, text="Back to Chat Panel", width=20, height=1,
+                                           command=self.back_to_chatpanel)
         back_chat_panel_button.grid(column=0, row=4, sticky="nsew")
 
-        back_button = tk.Button(self, text="Log out", width=20, height=1, command = self.back_to_startpage)
+        back_button = tk.Button(self, text="Log out", width=20, height=1, command=self.logout)
         back_button.grid(column=0, row=5, sticky="nsew")
  
         self.error_chats = tk.StringVar() 
@@ -78,8 +79,9 @@ class ChatPage(tk.Frame):
         
     def sendMessageClick(self):
         self.current_message = self.textField.get()
-        self.request.new_msg(self.controller.chat_id, self.current_message)
-        self.client_socket.send_message(self.request.get_prepared_request())
+        if len(self.current_message) > 0:
+            self.request.new_msg(self.controller.chat_id, self.current_message)
+            self.client_socket.send_message(self.request.get_prepared_request())
 
     def chatUpdate(self, message):
         self.chat.configure(state='normal')
@@ -87,8 +89,20 @@ class ChatPage(tk.Frame):
         self.chat.see("end")
         self.chat.configure(state='disabled')
 
+    def logout(self):
+        self.request.logout()
+        self.client_socket.send_message(self.request.get_prepared_request())
+        self.show_timeout_message()
+        self.back_to_startpage()
+
+    def show_timeout_message(self):
+        mb.showerror("Logout", "Logout completed - timeout is reached")
+
     def message_arrived(self, message):
         msg = message["msg"]
+        if message["action"] == "logout" and message["msg"] == "Logout completed - timeout is reached":
+            self.show_timeout_message()
+            self.back_to_startpage()
         if message["action"] == "get_msgs":
             if message["succeed"] == True:
                 msgs = message["chat_msgs"]
