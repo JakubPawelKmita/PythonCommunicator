@@ -103,6 +103,14 @@ class Response:
             "chat_msgs": chat_msgs
         }
 
+    def get_chat_members(self, succeed, msg, members):
+        self.dict = {
+            "action": "get_chat_members",
+            "succeed": succeed,
+            "msg": msg,
+            "members": members
+        }
+
     def dummy_answer(self, msg):
         self.dict = {
             "action": "failed action",
@@ -134,7 +142,7 @@ def update_lastaction_time(user_id):
     mydb.commit()
 
 
-def logout_acion(msg):
+def logout_action(msg):
     try:
         cur.execute(f"SELECT login FROM users WHERE id = {user_id[notified_socket]}")
         result = cur.fetchall()
@@ -176,9 +184,8 @@ def logout_client_after_close(user_to_logout_id):
 mydb = mysql.connector.connect(
     host="127.0.0.1",
     user="root",
-    passwd="root",
-    db="pychatdb",
-    port=3307
+    passwd="",
+    db="pychatdb"
 )
 
 response = Response()
@@ -301,12 +308,12 @@ while True:
                 if last_action_time:
                     update_lastaction_time(user_id[notified_socket])
                     logout_msg = "Logout completed - timeout is reached"
-                    logout_acion(logout_msg)
+                    logout_action(logout_msg)
                     continue
                 update_lastaction_time(user_id[notified_socket])
                 if req["action"] == "logout":
                     logout_msg = "Logout completed - current user is None"
-                    logout_acion(logout_msg)
+                    logout_action(logout_msg)
 
                 elif req["action"] == "get_chats":
                     try:
@@ -324,6 +331,31 @@ while True:
                     except KeyError:
                         print("Client is not logged")
                         response.get_chats(False, "You are not logged", None)
+                        notified_socket.send(response.get_prepared_response())
+
+                elif req["action"] == "get_chat_members":
+                    try:
+                        chat = int(req["chat"])
+                        cur.execute(f"SELECT chat FROM chatmember WHERE user = {user_id[notified_socket]} AND chat = {chat}")
+                        result = cur.fetchall()
+                        if len(result) == 0:
+                            response.get_chat_members(False, "You are not a member of this chat", None)
+                            raise Exception("Not a member")
+                        cur.execute(f'SELECT login FROM users INNER JOIN chatmember ON users.id = chatmember.user WHERE chat = {chat}')
+                        members = cur.fetchall()
+                        member_list = []
+                        for m in members:
+                            member_list.append(m[0])
+                        response.get_chat_members(True, None, member_list)
+                    except KeyError:
+                        print("Client is not logged")
+                        response.get_chat_members(False, "You are not logged", None)
+                    except ValueError:
+                        print("chat must be an integer")
+                        response.get_chat_members(False, "chat must be an integer", None)
+                    except Exception as e:
+                        print(e)
+                    finally:
                         notified_socket.send(response.get_prepared_response())
 
                 elif req["action"] == "create_chat":

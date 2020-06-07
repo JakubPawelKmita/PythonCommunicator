@@ -43,6 +43,12 @@ class Request:
             "action": "get_chats"
         }
 
+    def get_chat_members(self, chat):
+        self.dict = {
+            "action": "get_chat_members",
+            "chat": chat
+        }
+
     def create_chat(self):
         self.dict = {
             "action": "create_chat"
@@ -160,21 +166,26 @@ def main():
             request.get_users()
             client.send_message(request.get_prepared_request())
 
+        elif command == "get_chat_members":
+            request.get_chat_members(input("  chat: "))
+            client.send_message(request.get_prepared_request())
+
         elif command == "get_msgs":
             request.get_msgs(input("  chat: "), input("  counter: "), input("  howmany: "))
             client.send_message(request.get_prepared_request())
 
         else:
-            print("  List of commands:")
-            print("    register       ")
-            print("    login          ")
-            print("    logout         ")
-            print("    get_chats      ")
-            print("    create_chat    ")
-            print("    add_to_chat    ")
-            print("    new_msg        ")
-            print("    get_users      ")
-            print("    get_msgs       ")
+            print("  List of commands: ")
+            print("    register        ")
+            print("    login           ")
+            print("    logout          ")
+            print("    get_chats       ")
+            print("    create_chat     ")
+            print("    add_to_chat     ")
+            print("    new_msg         ")
+            print("    get_users       ")
+            print("    get_chat_members")
+            print("    get_msgs        ")
 
 
 if __name__ == "__main__":
