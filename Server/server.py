@@ -104,8 +104,8 @@ while True:
                 sockets_list.remove(notified_socket)
                 del clients[notified_socket]
                 try:
-					if user_id[notified_socket] is not None:
-						logout_client_after_close(user_id[notified_socket])
+                    if user_id[notified_socket] is not None:
+                        logout_client_after_close(user_id[notified_socket])
                     del id_user[user_id[notified_socket]]
                     del user_id[notified_socket]
                 except KeyError:
