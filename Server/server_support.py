@@ -15,8 +15,7 @@ class ServerSupport:
         cur.execute(f'SELECT lastaction FROM users WHERE id = "{user_id}"')
         result = cur.fetchall()
         minute_diff = (datetime.now() - result[0][0]).seconds / 60
-        print(minute_diff)
-        if minute_diff > float(datetime.now().replace(hour=0, minute=1, second=0, microsecond=0).minute):
+        if minute_diff > float(datetime.now().replace(hour=0, minute=15, second=0, microsecond=0).minute):
             return True
         return False
 
