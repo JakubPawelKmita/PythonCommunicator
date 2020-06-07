@@ -41,9 +41,6 @@ class ChatPanel(tk.Frame):
         create_button = tk.Button(self, text="Create Chat", width=20, height=2, command = self.create_chat, font=("Times New Roman", 14))
         create_button.pack(pady=10, padx=10)
 
-        refresh_button = tk.Button(self, text="Refresh chats", width=20, height=2, command=self.get_chats, font=("Times New Roman", 14))
-        refresh_button.pack(pady=10, padx=10)
-
         back_button = tk.Button(self, text="Log out", width=20, height=2, command=self.logout, font=("Times New Roman", 14))
         back_button.pack(pady=10, padx=10)
 
