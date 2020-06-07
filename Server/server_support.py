@@ -109,6 +109,34 @@ class ServerSupport:
             notified_socket.send(response.get_prepared_response())
 
     @staticmethod
+    def get_chat_members(cur, user_id, notified_socket, req):
+        response = RespClass()
+        try:
+            chat = int(req["chat"])
+            cur.execute(f"SELECT chat FROM chatmember WHERE user = {user_id[notified_socket]} AND chat = {chat}")
+            result = cur.fetchall()
+            if len(result) == 0:
+                response.get_chat_members(False, "You are not a member of this chat", None)
+                raise Exception("Not a member")
+            cur.execute(
+                f'SELECT login FROM users INNER JOIN chatmember ON users.id = chatmember.user WHERE chat = {chat}')
+            members = cur.fetchall()
+            member_list = []
+            for m in members:
+                member_list.append(m[0])
+            response.get_chat_members(True, None, member_list)
+        except KeyError:
+            print("Client is not logged")
+            response.get_chat_members(False, "You are not logged", None)
+        except ValueError:
+            print("chat must be an integer")
+            response.get_chat_members(False, "chat must be an integer", None)
+        except Exception as e:
+            print(e)
+        finally:
+            notified_socket.send(response.get_prepared_response())
+
+    @staticmethod
     def get_chats(cur, user_id, notified_socket):
         response = RespClass()
         try:

@@ -98,7 +98,6 @@ class ChatPage(tk.Frame):
     def logout(self):
         self.request.logout()
         self.client_socket.send_message(self.request.get_prepared_request())
-        self.show_timeout_message()
         self.back_to_startpage()
 
     def show_timeout_message(self):
