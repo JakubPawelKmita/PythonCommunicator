@@ -63,13 +63,11 @@ class ServerSupport:
                 response.login(False, "user already logged")
                 notified_socket.send(response.get_prepared_response())
             else:
-                print(f"user with id: {result[0][0]} logged in")
 
                 sql = 'SELECT id, login, password, islogged  FROM users WHERE login = %s AND password = %s'
                 val = (req["login"], password)
                 cur.execute(sql, val)
                 result = cur.fetchall()
-                print(f"user with id: {result[0][0]}, islogged {result[0][3]} logged in")
 
                 q = 'UPDATE users SET islogged = 1 WHERE login = %s AND password = %s'
                 cur.execute(q, (result[0][1], password))
@@ -80,7 +78,6 @@ class ServerSupport:
                 val = (req["login"], password)
                 cur.execute(sql, val)
                 result = cur.fetchall()
-                print(f"user with id: {result[0][0]}, islogged {result[0][3]} logged in")
 
                 user_id[notified_socket] = result[0][0]
                 id_user[result[0][0]] = notified_socket
