@@ -18,36 +18,34 @@ class ChatPanel(tk.Frame):
         windowWidth = self.winfo_toplevel().winfo_reqwidth()
         windowHeight = self.winfo_toplevel().winfo_reqheight()
 
-        positionRight = int(self.winfo_toplevel().winfo_screenwidth()/2 - windowWidth)
-        positionDown = int(self.winfo_toplevel().winfo_screenheight()/2 - windowHeight)
-        self.winfo_toplevel().geometry("+{}+{}".format(positionRight, positionDown))
+        self.winfo_toplevel().geometry('400x500+400+300')
 
         self.winfo_toplevel().title("Chat Panel")
 
-        label_details = tk.Label(self, text="Please choose the chat, that you want to join: ", font=LARGE_FONT)
+        label_details = tk.Label(self, text="Please choose the chat, that you want to join: ", font=("Times New Roman", 16))
         label_details.pack(pady=10, padx=10)
 
         self.choosen_chat = tk.StringVar() 
         self.error_chats_load = tk.StringVar() 
-        self.chats = ttk.Combobox(self, width = 27, textvariable = self.choosen_chat, state="readonly", postcommand = self.get_chats) 
+        self.chats = ttk.Combobox(self, width = 27, height=2, textvariable = self.choosen_chat, state="readonly", postcommand = self.get_chats, font=("Times New Roman", 14)) 
         
         self.chats['values'] = () 
         self.chats.pack(pady=10, padx=10)
 
-        label_error_chats_load = tk.Label(self, textvariable=self.error_chats_load, fg="red")
+        label_error_chats_load = tk.Label(self, textvariable=self.error_chats_load, fg="red", font=("Times New Roman", 14))
         label_error_chats_load.pack()
 
-        start_button = tk.Button(self, text="Start Chat", width=20, height=1, command = self.start_chat)
+        start_button = tk.Button(self, text="Start Chat", width=20, height=2, command = self.start_chat, font=("Times New Roman", 14))
         start_button.pack(pady=10, padx=10)
 
-        create_button = tk.Button(self, text="Create Chat", width=20, height=1, command = self.create_chat)
+        create_button = tk.Button(self, text="Create Chat", width=20, height=2, command = self.create_chat, font=("Times New Roman", 14))
         create_button.pack(pady=10, padx=10)
 
-        back_button = tk.Button(self, text="Log out", width=20, height=1, command=self.logout)
-        back_button.pack(pady=10, padx=10)
-
-        refresh_button = tk.Button(self, text="Refresh chats", width=20, height=1, command=self.get_chats)
+        refresh_button = tk.Button(self, text="Refresh chats", width=20, height=2, command=self.get_chats, font=("Times New Roman", 14))
         refresh_button.pack(pady=10, padx=10)
+
+        back_button = tk.Button(self, text="Log out", width=20, height=2, command=self.logout, font=("Times New Roman", 14))
+        back_button.pack(pady=10, padx=10)
 
     def get_chats(self):
         self.request.get_chats()

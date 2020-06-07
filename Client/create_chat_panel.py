@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox as mb
 
-LARGE_FONT = ("Verdana", 12)
-
 
 class CreateChatPanel(tk.Frame):
 
@@ -27,15 +25,15 @@ class CreateChatPanel(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        label_details = tk.Label(self, text="Please choose the chatmembers from list:", font=LARGE_FONT)
-        label_details.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        label_details = tk.Label(self, text="Please choose the chatmembers from list:", font=("Times New Roman", 16))
+        label_details.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
 
         self.error_user_load = tk.StringVar()
         self.error_chat_create = tk.StringVar()
         self.error_user_add = tk.StringVar()
 
         self.vsb = tk.Scrollbar(self, orient="vertical")
-        self.text = tk.Text(self, width=40, height=20,
+        self.text = tk.Text(self, width=40, height=10,
                             yscrollcommand=self.vsb.set)
         self.vsb.config(command=self.text.yview)
         self.vsb.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
@@ -44,21 +42,21 @@ class CreateChatPanel(tk.Frame):
         label_error_usser_load = tk.Label(self, textvariable=self.error_user_load, fg="red")
         label_error_usser_load.grid(row=2, column=0, sticky="nsew", padx=2, pady=2)
 
-        create_button = tk.Button(self, text="Create Chat", width=20, height=1, command=self.create_chat)
-        create_button.grid(row=3, column=0, sticky="nsew", padx=2, pady=2)
+        create_button = tk.Button(self, text="Create Chat", width=20, height=2, command=self.create_chat, font=("Times New Roman", 14))
+        create_button.grid(row=3, column=0, sticky="nsew", columnspan=2, padx=2, pady=2)
 
-        label_error_chat_create = tk.Label(self, textvariable=self.error_chat_create, fg="green")
-        label_error_chat_create.grid(row=4, column=0, sticky="nsew", padx=2, pady=2)
+        self.label_error_chat_create = tk.Label(self, textvariable=self.error_chat_create, fg="red")
+        self.label_error_chat_create.grid(row=4, column=0, sticky="nsew", padx=2, pady=2)
 
         label_error_user_add = tk.Label(self, textvariable=self.error_user_add, fg="red")
         label_error_user_add.grid(row=5, column=0, sticky="nsew", padx=2, pady=2)
 
-        back_chat_panel_button = tk.Button(self, text="Back to Chat Panel", width=20, height=1,
+        back_chat_panel_button = tk.Button(self, text="Back to Chat Panel", width=20, height=2, font=("Times New Roman", 14),
                                            command=self.back_to_chatpanel)
-        back_chat_panel_button.grid(row=6, column=0, sticky="nsew", padx=2, pady=2)
+        back_chat_panel_button.grid(row=6, column=0, sticky="nsew", columnspan=2, padx=2, pady=2)
 
-        back_button = tk.Button(self, text="Log out", width=20, height=1, command=self.logout)
-        back_button.grid(row=7, column=0, sticky="nsew", padx=2, pady=2)
+        back_button = tk.Button(self, text="Log out", width=20, height=2, command=self.logout, font=("Times New Roman", 14))
+        back_button.grid(row=7, column=0, sticky="nsew",columnspan=2, padx=2, pady=2)
 
     def get_users(self):
         self.request.get_users()
@@ -151,7 +149,8 @@ class CreateChatPanel(tk.Frame):
             if message["succeed"] == True:
                 self.clean_errors()
                 self.error_chat_create.set(
-                    "Chat created successfuly. The id of chat is: {}. Please remember it.".format(self.created_chat))
+                    "Chat created successfuly. \n The id of chat is: {}. Please remember it.".format(self.created_chat))
+                self.label_error_chat_create["fg"] = "green"
             else:
                 self.clean_errors()
                 self.error_user_add.set(msg)

@@ -1,7 +1,5 @@
 import tkinter as tk
 
-LARGE_FONT= ("Verdana", 12)
-
 class RegisterPage(tk.Frame):
 
     def __init__(self, parent, controller, client_socket, request):
@@ -15,13 +13,9 @@ class RegisterPage(tk.Frame):
         windowWidth = self.winfo_toplevel().winfo_reqwidth()
         windowHeight = self.winfo_toplevel().winfo_reqheight()
 
-        positionRight = int(self.winfo_toplevel().winfo_screenwidth()/2 - windowWidth)
-        positionDown = int(self.winfo_toplevel().winfo_screenheight()/2 - windowHeight)
-        self.winfo_toplevel().geometry("+{}+{}".format(positionRight, positionDown))
-
         self.winfo_toplevel().title("Registration Page")
 
-        label_details = tk.Label(self, text="Please enter details below", font=LARGE_FONT)
+        label_details = tk.Label(self, text="Please enter details below", font=("Times New Roman", 16))
         label_details.pack(pady=10, padx=10)
         
         self.username_verify = tk.StringVar()
@@ -33,46 +27,46 @@ class RegisterPage(tk.Frame):
         self.error_regulations = tk.StringVar()
         self.error_registration = tk.StringVar()
         
-        label_username = tk.Label(self, text="Username")
+        label_username = tk.Label(self, text="Username", font=("Times New Roman", 14))
         label_username.pack()
 
-        entry_username_login = tk.Entry(self, textvariable=self.username_verify)
+        entry_username_login = tk.Entry(self, textvariable=self.username_verify, font=("Times New Roman", 14))
         entry_username_login.pack()
 
-        label_error_username = tk.Label(self, textvariable=self.error_username_verify, fg="red")
+        label_error_username = tk.Label(self, textvariable=self.error_username_verify, fg="red", font=("Times New Roman", 14))
         label_error_username.pack()
 
-        label_password = tk.Label(self, text="Password")
+        label_password = tk.Label(self, text="Password", font=("Times New Roman", 14))
         label_password.pack()
 
-        entry_password_login = tk.Entry(self, textvariable=self.password_verify, show= '*')
+        entry_password_login = tk.Entry(self, textvariable=self.password_verify, show= '*', font=("Times New Roman", 14))
         entry_password_login.pack()
 
-        label_error_password = tk.Label(self, textvariable=self.error_password_verify, fg="red")
+        label_error_password = tk.Label(self, textvariable=self.error_password_verify, fg="red", font=("Times New Roman", 14))
         label_error_password.pack()
 
-        label_email = tk.Label(self, text="Email")
+        label_email = tk.Label(self, text="Email", font=("Times New Roman", 14))
         label_email.pack()
 
-        entry_email_login = tk.Entry(self, textvariable=self.email_verify)
+        entry_email_login = tk.Entry(self, textvariable=self.email_verify, font=("Times New Roman", 14))
         entry_email_login.pack()
 
-        label_error_email = tk.Label(self, textvariable=self.error_email_verify, fg="red")
+        label_error_email = tk.Label(self, textvariable=self.error_email_verify, fg="red", font=("Times New Roman", 14))
         label_error_email.pack()
 
         self.check_variable = tk.IntVar()
-        check_button_regulations = tk.Checkbutton(self, text="I've read the chat regulations", variable=self.check_variable, onvalue=1, offvalue=0)
+        check_button_regulations = tk.Checkbutton(self, text="I've read the chat regulations", variable=self.check_variable, onvalue=1, offvalue=0, font=("Times New Roman", 14))
         check_button_regulations.pack()
-        label_error_regulations = tk.Label(self, textvariable=self.error_regulations, fg="red")
+        label_error_regulations = tk.Label(self, textvariable=self.error_regulations, fg="red", font=("Times New Roman", 14), )
         label_error_regulations.pack()
 
-        register_button = tk.Button(self, text="Register", width=10, height=1, command = self.register)
+        register_button = tk.Button(self, text="Register", width=12, height=2, command = self.register, font=("Times New Roman", 14))
         register_button.pack(pady=10, padx=10)
 
-        label_error_registration = tk.Label(self, textvariable=self.error_registration, fg="green")
+        label_error_registration = tk.Label(self, textvariable=self.error_registration, fg="green", font=("Times New Roman", 14))
         label_error_registration.pack()
 
-        back_button = tk.Button(self, text="Back to Login Page", width=20, height=1, command = self.back_to_startpage)
+        back_button = tk.Button(self, text="Back to Login Page", width=20, height=2, command = self.back_to_startpage, font=("Times New Roman", 14))
         back_button.pack(pady=10, padx=10)
 
     def register(self):
@@ -112,6 +106,7 @@ class RegisterPage(tk.Frame):
         
     def back_to_startpage(self):
         self.clean_everything()
+        self.check_variable.set(0)
         self.controller.show_frame("WelcomePage")
 
     def message_arrived(self, message):

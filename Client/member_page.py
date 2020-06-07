@@ -3,7 +3,7 @@ from tkinter import messagebox as mb
 
 LARGE_FONT= ("Verdana", 12)
 
-class AddUserToChat(tk.Frame):
+class MembersPage(tk.Frame):
 
     def __init__(self, parent, controller, client_socket, request):
         self.users = [] 
@@ -25,31 +25,24 @@ class AddUserToChat(tk.Frame):
         positionDown = int(self.winfo_toplevel().winfo_screenheight()/2 - windowHeight)
         self.winfo_toplevel().geometry("+{}+{}".format(positionRight, positionDown))
 
-        self.winfo_toplevel().title("Chat Creation Panel")
+        self.winfo_toplevel().title("Members Panel")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        label_details = tk.Label(self, text="Please choose the users from list:", font=("Times New Roman", 16))
+        label_details = tk.Label(self, text="Chatmembers are listed below:", font=("Times New Roman", 16))
         label_details.grid(row=0, column=0, sticky="nsew", padx=10, pady=10) 
 
         self.error_user_load = tk.StringVar() 
-        self.error_user_add = tk.StringVar()
 
         self.vsb = tk.Scrollbar(self, orient="vertical")
-        self.text = tk.Text(self, width=40, height=15, 
+        self.text = tk.Text(self, width=40, height=20, 
                             yscrollcommand=self.vsb.set)
         self.vsb.config(command=self.text.yview)
         self.vsb.grid(row=1, column=1, sticky="nsew", padx=2, pady=2)
         self.text.grid(row=1, column=0, sticky="nsew", padx=10, pady=10) 
 
-        label_error_usser_load = tk.Label(self, textvariable=self.error_user_load, fg="red")
-        label_error_usser_load.grid(row=2, column=0, sticky="nsew", padx=2, pady=2)
-
-        create_button = tk.Button(self, text="Add users", width=20, height=2, command = self.add_to_chat, font=("Times New Roman", 14))
-        create_button.grid(row=3, column=0, sticky="nsew", columnspan=2, padx=2, pady=2)
-
-        self.label_error_user_add= tk.Label(self, textvariable=self.error_user_add, fg="red")
-        self.label_error_user_add.grid(row=5, column=0, sticky="nsew", padx=2, pady=2)
+        label_error_user_load = tk.Label(self, textvariable=self.error_user_load, fg="red")
+        label_error_user_load.grid(row=2, column=0, sticky="nsew", padx=2, pady=2)
 
         back_chat_panel_button = tk.Button(self, text="Back to Chat", width=20, height=2, command = self.back_to_chat, font=("Times New Roman", 14))
         back_chat_panel_button.grid(row=6, column=0, sticky="nsew", columnspan=2, padx=2, pady=2)
@@ -58,31 +51,21 @@ class AddUserToChat(tk.Frame):
         back_button.grid(row=7, column=0, sticky="nsew", columnspan=2, padx=2, pady=2)
 
     def get_users(self):
-        self.request.get_users()
+        self.request.get_chat_members(self.controller.chat_id)
         self.client_socket.send_message(self.request.get_prepared_request())
 
     def fill_users(self):
         self.text.configure(state='normal')
         self.text.delete("1.0",tk.END)
         self.text.configure(state='disabled')
-        self.checkboxes = {}
-        for u in self.users:
-            if u != self.controller.client_socket.get_client_name():
-                cv = tk.IntVar()
-                cb = tk.Checkbutton(self, text="", variable=cv, onvalue=1, offvalue=0, width=2, height=1)
-                self.checkboxes[u] = cv
-                self.text.configure(state='normal')
-                self.text.window_create("end", window=cb, padx=0, pady=0, align="bottom")
-                self.text.insert("end", " "+u+"\n") 
-                self.text.configure(state='disabled')
-
-    def clean_errors(self):
-        self.error_user_load.set("")
-        self.error_user_add.set("")
+        for i,u in enumerate(self.users):
+            self.text.configure(state='normal')
+            self.text.insert("end", str(i+1)+". "+u+"\n") 
+            self.text.configure(state='disabled')
     
     def clean_everything(self):
         self.fill_users()
-        self.clean_errors()
+        self.error_user_load.set("")
 
     def back_to_chat(self):
         self.controller.show_frame("ChatPage")
@@ -97,17 +80,6 @@ class AddUserToChat(tk.Frame):
         self.client_socket.send_message(self.request.get_prepared_request())
         self.back_to_startpage()
 
-    def add_to_chat(self):
-        checks = [ i.get() for i in self.checkboxes.values()]
-        if 1 in checks:
-            for u, c in self.checkboxes.items():
-                if c.get() == 1:
-                    self.request.add_to_chat(u, self.controller.chat_id)
-                    self.client_socket.send_message(self.request.get_prepared_request())
-                    self.number += 1
-        else:
-            self.error_user_add.set("You have to choose at least one member!")
-
     def show_timeout_message(self):
         mb.showerror("Logout", "Logout completed - timeout is reached")
 
@@ -116,29 +88,13 @@ class AddUserToChat(tk.Frame):
         if message["action"] == "logout" and message["msg"] == "Logout completed - timeout is reached":
             self.show_timeout_message()
             self.back_to_startpage()
-        if message["action"] == "get_users":
-            if message["succeed"] == True and message['user_list'] is None:
-                self.users = []
-                self.clean_errors()
-                self.error_user_load.set(msg)
-            elif message["succeed"] == True and message['user_list'] is not None:
-                self.users = message['user_list']
+        if message["action"] == "get_chat_members":
+            if message["succeed"] == True and message['members'] is not None:
+                self.users = message['members']
                 self.fill_users()
-                self.clean_errors()
-                self.error_user_load.set('')
+                self.error_user_load.set("")
             else:
-                self.clean_errors()
                 self.error_user_load.set(msg)
-        elif message["action"] == "add_to_chat":
-            if message["succeed"] == True:
-                self.clean_errors()
-                self.added_users += 1
-                self.label_error_user_add["fg"] = "green"
-                self.error_user_add.set("User added")
-            else:
-                self.clean_errors()
-                self.error_user_add.set(message["msg"])
-                self.label_error_user_add["fg"] = "red"
 
     def set_title_frame(self):
         self.winfo_toplevel().title("Add User Panel")

@@ -35,29 +35,31 @@ class ChatPage(tk.Frame):
         self.chat.configure(state='disabled')
         self.chat.grid(column=0, row=0, sticky="nsew")
 
-        self.textField = tk.Entry(self)
-        self.textField.grid(column=0, row=1, sticky="nsew")
+        self.textField = tk.Entry(self, font=("Times New Roman", 14))
+        self.textField.grid(column=0, row=1, columnspan=2, sticky="nsew")
 
-        self.buttonSend = tk.Button(self)
+        self.buttonSend = tk.Button(self, height=2, font=("Times New Roman", 14))
         self.buttonSend["text"] = "Send Message"
-        self.buttonSend.grid(column=0, row=2, sticky="nsew")
+        self.buttonSend.grid(column=0, row=2, columnspan=2, sticky="nsew")
         self.buttonSend.bind("<Button-1>", lambda event: self.sendMessageClick())
 
-        self.buttonAddUser = tk.Button(self)
+        self.buttonAddUser = tk.Button(self, height=2, font=("Times New Roman", 14))
         self.buttonAddUser["text"] = "Add Member to this chat"
-        self.buttonAddUser.grid(column=0, row=3, sticky="nsew")
+        self.buttonAddUser.grid(column=0, row=3, columnspan=2, sticky="nsew")
         self.buttonAddUser.bind("<Button-1>", lambda event: self.add_member())
 
-        back_chat_panel_button = tk.Button(self, text="Back to Chat Panel", width=20, height=1,
-                                           command=self.back_to_chatpanel)
-        back_chat_panel_button.grid(column=0, row=4, sticky="nsew")
+        show_details_button = tk.Button(self, text="Get chat members", command=self.details, height=2, font=("Times New Roman", 14))
+        show_details_button.grid(column=0, row=4, columnspan=2, sticky="nsew")
 
-        back_button = tk.Button(self, text="Log out", width=20, height=1, command=self.logout)
-        back_button.grid(column=0, row=5, sticky="nsew")
- 
+        back_chat_panel_button = tk.Button(self, text="Back to Chat Panel", command=self.back_to_chatpanel, height = 2, font=("Times New Roman", 14))
+        back_chat_panel_button.grid(column=0, row=5, columnspan=2, sticky="nsew")
+
+        back_button = tk.Button(self, text="Log out", command=self.logout, height=2, font=("Times New Roman", 14))
+        back_button.grid(column=0, row=6, columnspan=2, sticky="nsew")
+        
         self.error_chats = tk.StringVar() 
         label_error_user_add= tk.Label(self, textvariable=self.error_chats, fg="red")
-        label_error_user_add.grid(column=0, row=6, sticky="nsew")
+        label_error_user_add.grid(column=0, row=7, sticky="nsew")
 
     def back_to_chatpanel(self):
         self.error_chats.set("")
@@ -73,6 +75,10 @@ class ChatPage(tk.Frame):
         self.chat.delete("1.0",tk.END)
         self.chat.configure(state='disabled')
         self.controller.show_frame("WelcomePage")
+
+    def details(self):
+        self.error_chats.set("")
+        self.controller.show_frame("MembersPage")
 
     def add_member(self):
         self.controller.show_frame("AddUserToChat")

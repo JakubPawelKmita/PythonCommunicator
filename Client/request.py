@@ -39,6 +39,12 @@ class Request:
             "action": "create_chat"
         }
 
+    def get_chat_members(self, chat):
+        self.dict = {
+            "action": "get_chat_members",
+            "chat": chat
+        }
+
     def add_to_chat(self, login, chat):
         self.dict = {
             "action": "add_to_chat",

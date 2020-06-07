@@ -7,6 +7,7 @@ from register_page import RegisterPage
 from chat_panel import ChatPanel
 from create_chat_panel import CreateChatPanel
 from add_user import AddUserToChat
+from member_page import MembersPage
 
 class MainFrame(tk.Tk):
 
@@ -24,7 +25,7 @@ class MainFrame(tk.Tk):
 
         self.frames = {}
 
-        for F in (WelcomePage, RegisterPage, ChatPanel, CreateChatPanel, ChatPage, AddUserToChat):
+        for F in (WelcomePage, RegisterPage, ChatPanel, CreateChatPanel, ChatPage, AddUserToChat, MembersPage):
             frame = F(container, self, client_socket, request)
 
             self.frames[F.__name__] = frame
@@ -37,7 +38,7 @@ class MainFrame(tk.Tk):
         self.frame = self.frames[cont]
         if cont == "ChatPanel":
             self.frame.get_chats()
-        elif cont in ["CreateChatPanel", "AddUserToChat"]:
+        elif cont in ["CreateChatPanel", "AddUserToChat", "MembersPage"]:
             self.frame.get_users()
         self.frame.set_title_frame()
         self.frame.tkraise()
