@@ -3,6 +3,10 @@ import hashlib
 from PythonCommunicator.Server.response import RespClass
 
 
+def anti_drop(s):
+    return s.replace('\\', '\\\\').replace('"', '\\"')
+
+
 class ServerSupport:
     @staticmethod
     def update_lastaction_time(user_id, cur, mydb):
@@ -22,24 +26,30 @@ class ServerSupport:
     @staticmethod
     def register(cur, req, mydb, notified_socket):
         response = RespClass()
-        cur.execute(f'SELECT login FROM users WHERE login = "{req["login"]}"')
-        if len(cur.fetchall()) == 0:
-            print("INSERT new user")
-            p = req["password"]
-            sql = "INSERT INTO users (login, password, email, islogged) VALUES (%s, %s, %s, %s)"
-            val = (req["login"], hashlib.sha256(p.encode()).hexdigest(), req["email"], 0)
-            cur.execute(sql, val)
-            mydb.commit()
-            print(cur.rowcount, "record inserted.")
-            response.register(True, None)
-            notified_socket.send(response.get_prepared_response())
+        if req["login"] == anti_drop(req["login"]) and req["email"] == anti_drop(req["email"]):
+            cur.execute(f'SELECT login FROM users WHERE login = "{req["login"]}"')
+            if len(cur.fetchall()) == 0:
+                print("INSERT new user")
+                p = req["password"]
+                sql = "INSERT INTO users (login, password, email, islogged) VALUES (%s, %s, %s, %s)"
+                val = (req["login"], hashlib.sha256(p.encode()).hexdigest(), req["email"], 0)
+                cur.execute(sql, val)
+                mydb.commit()
+                print(cur.rowcount, "record inserted.")
+                response.register(True, None)
+                notified_socket.send(response.get_prepared_response())
+            else:
+                print("user with this login already exists!")
+                response.register(False, "user with this login already exists")
+                notified_socket.send(response.get_prepared_response())
         else:
-            print("user with this login already exists!")
-            response.register(False, "user with this login already exists")
+            response.register(False, "not aloowed signs (\" or \\) in login or email")
             notified_socket.send(response.get_prepared_response())
 
     @staticmethod
     def login(cur, notified_socket, req, mydb, user_id, id_user):
+
+        req["login"] = anti_drop(req["login"])
         cur.execute(f'SELECT login FROM users WHERE login = "{req["login"]}"')
         query_result = cur.fetchall()
         response = RespClass()
@@ -174,9 +184,10 @@ class ServerSupport:
             notified_socket.send(response.get_prepared_response())
 
     @staticmethod
-    def add_to_chat(req, cur, user_id, notified_socket, mydb):
+    def add_to_chat(req, cur, user_id, notified_socket, mydb, id_user):
         response = RespClass()
         try:
+            req["login"] = anti_drop(req["login"])
             chat = int(req["chat"])
 
             cur.execute(
@@ -201,8 +212,15 @@ class ServerSupport:
                 raise Exception("User is already in this chat")
 
             cur.execute(f'INSERT INTO chatmember (chat, user) VALUES ({chat}, {user_to_add})')
+
             mydb.commit()
             print(cur.rowcount, "record inserted.")
+
+            try:
+                ServerSupport.get_chats(cur, user_id, id_user[user_to_add])
+            except KeyError:
+                pass
+
             response.add_to_chat(True, None)
 
         except KeyError:
@@ -242,6 +260,8 @@ class ServerSupport:
                     id_user[member[0]].send(response.get_prepared_response())
                 except KeyError:
                     continue
+
+            msg = anti_drop(msg)
 
             cur.execute(
                 f'INSERT INTO messages (user, chat, time, msg) VALUES ({user}, {chat}, CURRENT_TIMESTAMP, "{msg}")')

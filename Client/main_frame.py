@@ -45,6 +45,7 @@ class MainFrame(tk.Tk):
 
     def make_update(self, message):
         try:
+            print(message, type(message))
             parsed_msg = json.loads(message)
             self.frame.message_arrived(parsed_msg)
         except Exception as e:

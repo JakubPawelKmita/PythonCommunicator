@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox as mb
@@ -27,7 +28,7 @@ class ChatPanel(tk.Frame):
 
         self.choosen_chat = tk.StringVar() 
         self.error_chats_load = tk.StringVar() 
-        self.chats = ttk.Combobox(self, width = 27, height=2, textvariable = self.choosen_chat, state="readonly", postcommand = self.get_chats, font=("Times New Roman", 14)) 
+        self.chats = ttk.Combobox(self, width = 27, height=2, textvariable = self.choosen_chat, state="readonly", postcommand = self.get_chats, font=("Times New Roman", 14))
         
         self.chats['values'] = () 
         self.chats.pack(pady=10, padx=10)

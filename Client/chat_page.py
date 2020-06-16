@@ -115,9 +115,9 @@ class ChatPage(tk.Frame):
                 for u, m in msgs:
                     self.chat.configure(state='normal')
                     if u == self.controller.client_socket.get_client_name():
-                        self.chat.insert('end', 'Me > '+ m + '\n')
+                        self.chat.insert('end', 'Me > '+ str(m) + '\n')
                     else:
-                        self.chat.insert('end', u  + ' > '+ m + '\n')
+                        self.chat.insert('end', str(u)  + ' > '+ str(m) + '\n')
                     self.chat.see("end")
                     self.chat.configure(state='disabled')
             else:
@@ -125,7 +125,7 @@ class ChatPage(tk.Frame):
         elif message["action"] == "new_msg":
             if message["succeed"] == True:
                 self.chat.configure(state='normal')
-                self.chat.insert('end', 'Me > '+ self.current_message + '\n')
+                self.chat.insert('end', 'Me > '+ str(self.current_message) + '\n')
                 self.chat.see("end")
                 self.chat.configure(state='disabled')
                 self.textField.delete(0, "end")
@@ -134,7 +134,7 @@ class ChatPage(tk.Frame):
         elif message["action"] == "chat_update":
             if message["login"] != self.controller.client_socket.get_client_name():
                 self.chat.configure(state='normal')
-                self.chat.insert('end', message["login"]  + ' > '+ msg + '\n')
+                self.chat.insert('end', str(message["login"])  + ' > '+ str(msg) + '\n')
                 self.chat.see("end")
                 self.chat.configure(state='disabled')
                 self.textField.delete(0, "end")

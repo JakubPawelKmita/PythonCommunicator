@@ -111,7 +111,7 @@ class RegisterPage(tk.Frame):
 
     def message_arrived(self, message):
         if message["succeed"] == True:
-            self.error_registration.set("Congratulations. Now you can login, come back to Login Page")
+            self.error_registration.set("Congratulations! Now you can log in")
             self.error_username_verify.set("")
             self.error_password_verify.set("")
             self.error_email_verify.set("")
