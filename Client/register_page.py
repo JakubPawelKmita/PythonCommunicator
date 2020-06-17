@@ -1,4 +1,5 @@
 import tkinter as tk
+from email_validator import validate_email, EmailNotValidError
 
 class RegisterPage(tk.Frame):
 
@@ -94,8 +95,14 @@ class RegisterPage(tk.Frame):
             self.error_email_verify.set("Email cannot be empty")
             positive_validation[2] = False
         else:
-            self.error_email_verify.set("")
-            positive_validation[2] = True
+            try:
+                valid = validate_email(self.email_verify.get())
+            except EmailNotValidError as e:
+                self.error_email_verify.set("Email does not match pattern")
+                positive_validation[2] = False
+            else:
+                self.error_email_verify.set("")
+                positive_validation[2] = True
         if self.check_variable.get() == 0:
             self.error_regulations.set("You have to agree with the rules")
             positive_validation[3] = False
@@ -111,7 +118,7 @@ class RegisterPage(tk.Frame):
 
     def message_arrived(self, message):
         if message["succeed"] == True:
-            self.error_registration.set("Congratulations! Now you can log in")
+            self.error_registration.set("Congratulations. Now you can login, come back to Login Page")
             self.error_username_verify.set("")
             self.error_password_verify.set("")
             self.error_email_verify.set("")
